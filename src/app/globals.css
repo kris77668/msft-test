@@ -1,0 +1,141 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Ms Fairy Tale — "Whispered" design system (Direction A, locked)
+   Ported from design_handoff/site/core.jsx (tokens `A`, text styles `S`).
+
+   Contrast values below are measured, not estimated.
+   Run `node scripts/check-contrast.mjs` to re-verify after any change.
+   ───────────────────────────────────────────────────────────────────────── */
+
+@theme {
+  /* ── Surfaces ─────────────────────────────────────────────── */
+  --color-cream: #faf6ef; /* page background */
+  --color-paper: #f5ede2; /* section / card background */
+  --color-blush: #f3e3df; /* accent section background */
+
+  /* ── Text (both pass AA comfortably on cream) ─────────────── */
+  --color-mocha: #3d2e26; /* primary text / primary button fill — 12.05:1 */
+  --color-ink: #2a201b; /* footer / dark sections — 14.76:1 */
+
+  /* ── Decorative accents ───────────────────────────────────────
+     These are the locked brand accents. On cream they measure:
+       rose  2.02:1   dusty 2.79:1   gold 2.58:1
+     All three FAIL WCAG AA (4.5:1) and rose fails even the large-text
+     threshold (3:1). Use them for fills, borders, rules, numerals and
+     display type at 24px+ — never for small text on a light surface.
+     On ink they all pass (5.28–7.30:1), so dark sections are unrestricted. */
+  --color-rose: #d4a59a; /* process numerals, pull quotes */
+  --color-dusty: #b88a7e; /* secondary accent */
+  --color-gold: #b8956a; /* bespoke accent — buttons, tags, "From $" */
+
+  /* ── Accessible text variants ─────────────────────────────────
+     Hue-preserving darkenings that meet AA on cream. Use these
+     anywhere the same accent needs to carry text under 24px:
+     the "From $4,800" price, eyebrows, meta lines, form errors. */
+  --color-dusty-text: #8c6960; /* 4.53:1 */
+  --color-gold-text: #866d4d; /* 4.52:1 */
+  --color-rose-text: #886a63; /* 4.55:1 */
+  --color-error: #bd4d46; /* 4.52:1 — was #c14f47 (4.35:1, failed) */
+
+  /* ── Lines ────────────────────────────────────────────────── */
+  --color-rule: rgb(61 46 38 / 0.18); /* borders */
+  --color-softrule: rgb(61 46 38 / 0.1); /* hairlines */
+
+  /* ── Derived tints ────────────────────────────────────────────
+     Colours built from the palette above. These exist so no component
+     ever hand-writes an rgba() — every colour in the codebase traces
+     back to this file. Verify with:
+       grep -rn "#[0-9a-f]\{6\}\|rgba(" src --include="*.tsx" */
+  --color-gold-tint: rgb(184 149 106 / 0.08); /* bespoke fill behind gold borders */
+  --color-scrim: rgb(20 15 10 / 1); /* image darkening; opacity set per use */
+
+  /* Text and borders laid over a scrimmed photograph — the home hero, the
+     atelier masthead. A warm off-white rather than pure white, so it reads as
+     part of this palette rather than as a generic UI colour.
+
+     Deliberately absent from scripts/check-contrast.mjs: its contrast depends
+     on the photograph beneath and the <Photo dim={…}> scrim, not on a flat
+     background, so measuring it against one would report a meaningless number.
+     Legibility here is governed by `dim` — 0.28 on the home hero, 0.32 on the
+     atelier. */
+  --color-onscrim: #fff8ee;
+
+  /* ── Breakpoints ──────────────────────────────────────────────
+     The prototype branched on JS width at 768 and 1080. Same values,
+     now as real media queries. Only `lg` differs from Tailwind's default. */
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1080px;
+
+  /* ── Radius ───────────────────────────────────────────────────
+     Square by design. Editorial/atelier, deliberately not rounded-card SaaS. */
+  --radius-none: 0px;
+  --radius-sm: 2px;
+}
+
+@theme inline {
+  --font-display: var(--font-cormorant); /* Cormorant Garamond 300, italic for emphasis */
+  --font-body: var(--font-jost); /* Jost 300 */
+}
+
+:root {
+  /* The blush gradient sitting under every <Photo>, so a slow or failed image
+     load degrades to something still recognisably the brand. Declared here
+     rather than inline in the component so the palette has one home. */
+  --gradient-blush: linear-gradient(155deg, #f3e3df 0%, #e7cabf 55%, #d9b6a9 100%);
+}
+
+@layer base {
+  html {
+    background-color: var(--color-cream);
+    color: var(--color-mocha);
+  }
+
+  body {
+    font-family: var(--font-body);
+    font-weight: 300;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background: var(--color-rose);
+    color: var(--color-cream);
+  }
+
+  /* The prototype's scroll reveals had no reduced-motion guard anywhere.
+     This is the global backstop; the Reveal component also checks in JS
+     so it can render content visible immediately rather than just fast. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* `S.eyebrow` — the kicker/label/button treatment on nearly every section.
+     The prototype floors at 8.5px, which contradicts its own README ("body >=12px")
+     and is genuinely hard to read at 0.32em tracking. 11px keeps the look and
+     stays legible; 12px where it carries meaning rather than decoration. */
+  .eyebrow {
+    font-family: var(--font-body);
+    font-size: 11px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    font-weight: 400;
+  }
+
+  .eyebrow-lg {
+    font-family: var(--font-body);
+    font-size: 12px;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    font-weight: 400;
+  }
+}
