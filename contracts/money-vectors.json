@@ -1,0 +1,62 @@
+{
+  "$comment": [
+    "Shared behavioural contract for money formatting.",
+    "",
+    "The website computes these in TypeScript (src/lib/money.ts) and the Flutter",
+    "app computes them in Dart (lib/format/money.dart). Dart cannot import",
+    "TypeScript, so the two implementations are proven identical by asserting",
+    "both against this file rather than by sharing code.",
+    "",
+    "Both test suites read it: src/lib/money.contract.test.ts here, and",
+    "test/money_contract_test.dart in the app repo. If you change a formatting",
+    "rule, change it here first and watch both suites fail.",
+    "",
+    "The copy in the app repo is kept in sync by scripts/sync-contracts.mjs."
+  ],
+  "format": [
+    { "cents": 0, "expected": "$0", "why": "A free consultation type is legal and must not render as $0.00." },
+    { "cents": 100, "expected": "$1" },
+    { "cents": 16000, "expected": "$160", "why": "Opera gloves — the cheapest catalogue item." },
+    { "cents": 240000, "expected": "$2,400", "why": "Thousands separator." },
+    { "cents": 340000, "expected": "$3,400" },
+    { "cents": 980000, "expected": "$9,800", "why": "Top of the bespoke range." },
+    { "cents": 240050, "expected": "$2,400.50", "why": "Non-whole amounts keep both decimals." },
+    { "cents": 240005, "expected": "$2,400.05", "why": "Leading zero in the cents must survive." },
+    { "cents": 1, "expected": "$0.01" },
+    { "cents": 100000000, "expected": "$1,000,000", "why": "Two separators." }
+  ],
+  "formatRange": [
+    {
+      "fromCents": 480000,
+      "toCents": 620000,
+      "expected": "$4,800 — $6,200",
+      "why": "Em dash U+2014 with a space either side. A hyphen reads as a typo at display sizes."
+    },
+    { "fromCents": 320000, "toCents": 320000, "expected": "$3,200 — $3,200", "why": "Degenerate range still renders both ends." },
+    { "fromCents": 320000, "toCents": 980000, "expected": "$3,200 — $9,800" }
+  ],
+  "gstComponent": [
+    { "inclusiveCents": 11000, "expected": 1000, "why": "GST on a $110 total is $10, not $11. Divide by 11, never multiply by 0.1." },
+    { "inclusiveCents": 240000, "expected": 21818 },
+    { "inclusiveCents": 0, "expected": 0 },
+    { "inclusiveCents": 1, "expected": 0, "why": "Rounds to nearest; a one cent total has no GST component." },
+    { "inclusiveCents": 6, "expected": 1, "why": "0.545 rounds up." },
+    { "inclusiveCents": 5, "expected": 0, "why": "0.4545 rounds down." }
+  ],
+  "exGst": [
+    { "inclusiveCents": 11000, "expected": 10000 },
+    { "inclusiveCents": 240000, "expected": 218182, "why": "exGst + gst must equal the total exactly." }
+  ],
+  "instalment": [
+    { "totalCents": 240000, "instalments": 4, "expected": 60000 },
+    {
+      "totalCents": 240001,
+      "instalments": 4,
+      "expected": 60001,
+      "why": "Rounds UP. Rounding to nearest quoted four instalments summing below the total, which is a promise the checkout then breaks."
+    },
+    { "totalCents": 100, "instalments": 4, "expected": 25 },
+    { "totalCents": 3, "instalments": 4, "expected": 1 },
+    { "totalCents": 0, "instalments": 4, "expected": 0 }
+  ]
+}
